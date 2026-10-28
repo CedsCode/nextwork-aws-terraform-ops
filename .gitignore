@@ -4,4 +4,3 @@
 *.tfvars
 !*.tfvars.example
 crash.log
-HANDOFF.md
