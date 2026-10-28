@@ -1,0 +1,16 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+aws_region         = "ap-southeast-1"
+alert_email        = "you@example.com"
+app_port           = 8080
+monthly_budget_usd = 20
+environment        = "prod"
+
+# Usually leave these at their defaults:
+# name_prefix                    = "nextwork"
+# instance_tag_key               = "role"
+# instance_tag_value             = "webserver"
+# health_check_path              = "/nextwork-web-project/"
+# alb_listener_port              = 80
+# alb_ingress_cidrs              = ["0.0.0.0/0"]
+# alarm_period                   = 60
+# budget_notification_thresholds = [50, 80, 100]
