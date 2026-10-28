@@ -17,6 +17,8 @@ module "codeartifact" {
   source = "./modules/codeartifact"
 
   name_prefix         = var.name_prefix
+  domain_name         = var.codeartifact_domain_name
+  repository_name     = var.codeartifact_repository_name
   upstream_connection = var.codeartifact_upstream
 }
 

@@ -7,6 +7,10 @@ environment        = "dev"
 # Your public IP, to hit the app directly before the ALB works (then remove):
 # app_direct_cidrs = ["x.x.x.x/32"]
 
+# Only if your app repo's build files hardcode CodeArtifact names (default: nextwork-domain / nextwork-repo):
+# codeartifact_domain_name     = "nextwork"
+# codeartifact_repository_name = "nextwork-devops-cicd"
+
 # Optional SSH (default: none - use SSM Session Manager):
 # ssh_cidr = "x.x.x.x/32"
 # key_name = "my-key-pair"

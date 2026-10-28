@@ -13,11 +13,11 @@ fronted by an ALB with alarms and a cost budget. This replaces the original Clou
 
 ## Secret missions completed
 Both NextWork secret missions were completed in the original CloudFormation-based build of this project:
-- **Automated testing (CodeBuild):** added a unit test to the Java web app so tests run automatically on every build.
+- **Automated testing (CodeBuild):** added a test step (`test.sh`) to the build so tests run automatically on every build.
 - **Manual rollback (CodePipeline):** triggered a manual rollback of the Deploy stage and verified the web app reverted to its previous state.
 
 The Terraform here supports both: the pipeline is V2 (required for stage rollback), and the CodeDeploy
-deployment group auto-rolls back failed deployments. The unit test lives in the app repo,
+deployment group auto-rolls back failed deployments. The test script lives in the app repo,
 [`CedsCode/nextwork-web-project`](https://github.com/CedsCode/nextwork-web-project).
 
 ## What it creates

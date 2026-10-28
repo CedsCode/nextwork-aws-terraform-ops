@@ -3,6 +3,18 @@ variable "name_prefix" {
   type        = string
 }
 
+variable "domain_name" {
+  description = "Exact domain name. Null = <name_prefix>-<domain_suffix>."
+  type        = string
+  default     = null
+}
+
+variable "repository_name" {
+  description = "Exact repository name. Null = <name_prefix>-<repository_suffix>."
+  type        = string
+  default     = null
+}
+
 variable "domain_suffix" {
   description = "Domain name is <name_prefix>-<domain_suffix>."
   type        = string

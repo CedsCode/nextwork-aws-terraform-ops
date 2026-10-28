@@ -67,6 +67,18 @@ variable "artifacts_force_destroy" {
   default     = true
 }
 
+variable "codeartifact_domain_name" {
+  description = "Exact CodeArtifact domain name the app repo's build files expect. Null = <name_prefix>-domain."
+  type        = string
+  default     = null
+}
+
+variable "codeartifact_repository_name" {
+  description = "Exact CodeArtifact repository name the app repo's build files expect. Null = <name_prefix>-repo."
+  type        = string
+  default     = null
+}
+
 variable "codeartifact_upstream" {
   description = "External connection used as the CodeArtifact repository upstream."
   type        = string
