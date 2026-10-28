@@ -1,6 +1,6 @@
 # --- General ----------------------------------------------------------------
 variable "aws_region" {
-  description = "Region where the existing environment lives."
+  description = "Region to deploy into."
   type        = string
   default     = "ap-southeast-1"
 }
@@ -32,7 +32,7 @@ variable "project_tag_key" {
 variable "environment" {
   description = "Deployment environment tag value (dev, staging, prod)."
   type        = string
-  default     = "prod"
+  default     = "dev"
 }
 
 variable "owner" {
@@ -47,7 +47,7 @@ variable "managed_by" {
   default     = "terraform"
 }
 
-# --- Existing infrastructure lookup -----------------------------------------
+# --- Network ----------------------------------------------------------------
 variable "use_default_vpc" {
   description = "Use the region's default VPC. If false, set vpc_id."
   type        = bool
@@ -60,22 +60,79 @@ variable "vpc_id" {
   default     = null
 }
 
-variable "instance_tag_key" {
-  description = "Tag key identifying the existing web server instance."
+# --- Artifacts / CodeArtifact -----------------------------------------------
+variable "artifacts_force_destroy" {
+  description = "Allow destroying the artifact bucket while it holds objects (dev only)."
+  type        = bool
+  default     = true
+}
+
+variable "codeartifact_upstream" {
+  description = "External connection used as the CodeArtifact repository upstream."
+  type        = string
+  default     = "public:maven-central"
+}
+
+# --- Web server -------------------------------------------------------------
+variable "instance_type" {
+  description = "EC2 instance type for the web server."
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "tomcat_version" {
+  description = "Tomcat version installed on the web server."
+  type        = string
+  default     = "9.0.109"
+}
+
+variable "key_name" {
+  description = "Optional EC2 key pair name. Null = none (use SSM Session Manager)."
+  type        = string
+  default     = null
+}
+
+variable "ssh_cidr" {
+  description = "CIDR allowed SSH access (x.x.x.x/32). Empty = no SSH rule."
+  type        = string
+  default     = ""
+}
+
+variable "app_direct_cidrs" {
+  description = "CIDRs allowed to reach the app port directly, bypassing the ALB (e.g. your IP to verify before the ALB works). Empty = ALB only."
+  type        = list(string)
+  default     = []
+}
+
+variable "web_role_tag_key" {
+  description = "Tag key on the web server that CodeDeploy targets."
   type        = string
   default     = "role"
 }
 
-variable "instance_tag_value" {
-  description = "Tag value identifying the existing web server instance."
+variable "web_role_tag_value" {
+  description = "Tag value on the web server that CodeDeploy targets."
   type        = string
   default     = "webserver"
 }
 
-variable "instance_state" {
-  description = "Instance state to match when looking up the web server."
+# --- CI/CD ------------------------------------------------------------------
+variable "github_repo" {
+  description = "GitHub repository as owner/name."
   type        = string
-  default     = "running"
+  default     = "CedsCode/nextwork-web-project"
+}
+
+variable "github_branch" {
+  description = "Branch the pipeline tracks."
+  type        = string
+  default     = "main"
+}
+
+variable "build_image" {
+  description = "CodeBuild image."
+  type        = string
+  default     = "aws/codebuild/amazonlinux-x86_64-standard:corretto8-23.04.25"
 }
 
 # --- Networking / ALB -------------------------------------------------------

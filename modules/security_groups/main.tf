@@ -22,9 +22,9 @@ resource "aws_security_group" "alb" {
   tags = { Name = "${var.name_prefix}-alb-sg" }
 }
 
-resource "aws_security_group" "app_from_alb" {
-  name        = "${var.name_prefix}-app-from-alb-sg"
-  description = "App port reachable only from the ALB"
+resource "aws_security_group" "app" {
+  name        = "${var.name_prefix}-app-sg"
+  description = "App port reachable from the ALB (and optional direct/SSH CIDRs)"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -35,6 +35,30 @@ resource "aws_security_group" "app_from_alb" {
     security_groups = [aws_security_group.alb.id]
   }
 
+  # Optional: reach the app directly (e.g. to verify before the ALB works).
+  dynamic "ingress" {
+    for_each = length(var.app_direct_cidrs) > 0 ? [1] : []
+    content {
+      description = "Direct app access from allowed CIDRs"
+      from_port   = var.app_port
+      to_port     = var.app_port
+      protocol    = "tcp"
+      cidr_blocks = var.app_direct_cidrs
+    }
+  }
+
+  # Optional: SSH. Empty by default - use SSM Session Manager instead.
+  dynamic "ingress" {
+    for_each = var.ssh_cidr != "" ? [var.ssh_cidr] : []
+    content {
+      description = "SSH from allowed CIDR"
+      from_port   = 22
+      to_port     = 22
+      protocol    = "tcp"
+      cidr_blocks = [ingress.value]
+    }
+  }
+
   egress {
     description = "All outbound"
     from_port   = 0
@@ -43,12 +67,5 @@ resource "aws_security_group" "app_from_alb" {
     cidr_blocks = var.egress_cidrs
   }
 
-  tags = { Name = "${var.name_prefix}-app-from-alb-sg" }
-}
-
-# Attach the SG above to the existing instance's ENI, without modifying the
-# CloudFormation-managed instance resource.
-resource "aws_network_interface_sg_attachment" "app" {
-  security_group_id    = aws_security_group.app_from_alb.id
-  network_interface_id = var.network_interface_id
+  tags = { Name = "${var.name_prefix}-app-sg" }
 }

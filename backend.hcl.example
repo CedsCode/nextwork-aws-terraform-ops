@@ -1,0 +1,7 @@
+# Output of `terraform -chdir=bootstrap output -raw backend_hcl`.
+# Copy to backend.hcl (gitignored) and run: terraform init -backend-config=backend.hcl
+bucket       = "nextwork-tfstate-<account-id>-ap-southeast-1"
+key          = "nextwork/terraform.tfstate"
+region       = "ap-southeast-1"
+encrypt      = true
+use_lockfile = true

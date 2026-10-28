@@ -1,0 +1,47 @@
+#!/bin/bash
+# Runs once at first boot (Amazon Linux 2023). Log: /var/log/user-data.log
+exec > >(tee /var/log/user-data.log) 2>&1
+set -euxo pipefail
+
+dnf install -y ${corretto_package} ruby wget tar
+
+# --- Tomcat ---
+useradd --system --home-dir /opt/tomcat --shell /sbin/nologin tomcat || true
+mkdir -p /opt/tomcat
+wget -q https://archive.apache.org/dist/tomcat/tomcat-${tomcat_major}/v${tomcat_version}/bin/apache-tomcat-${tomcat_version}.tar.gz -O /tmp/tomcat.tar.gz
+tar -xzf /tmp/tomcat.tar.gz -C /opt/tomcat --strip-components=1
+rm -f /tmp/tomcat.tar.gz
+
+# Listen on the app port instead of the default 8080
+sed -i 's/port="8080"/port="${app_port}"/' /opt/tomcat/conf/server.xml
+chown -R tomcat:tomcat /opt/tomcat
+
+cat > /etc/systemd/system/tomcat.service <<'UNIT'
+[Unit]
+Description=Apache Tomcat
+After=network.target
+
+[Service]
+Type=forking
+User=tomcat
+Group=tomcat
+Environment=JAVA_HOME=/usr/lib/jvm/jre-1.8.0
+Environment=CATALINA_HOME=/opt/tomcat
+Environment=CATALINA_PID=/opt/tomcat/temp/tomcat.pid
+ExecStart=/opt/tomcat/bin/startup.sh
+ExecStop=/opt/tomcat/bin/shutdown.sh
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now tomcat
+
+# --- CodeDeploy agent ---
+cd /tmp
+wget -q https://aws-codedeploy-${region}.s3.${region}.amazonaws.com/latest/install -O install
+chmod +x install
+./install auto
+systemctl enable --now codedeploy-agent

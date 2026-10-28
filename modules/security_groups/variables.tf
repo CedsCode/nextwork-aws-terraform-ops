@@ -8,11 +8,6 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "network_interface_id" {
-  description = "ENI of the existing instance to attach the app SG to."
-  type        = string
-}
-
 variable "app_port" {
   description = "Port the app listens on."
   type        = number
@@ -26,6 +21,18 @@ variable "alb_listener_port" {
 variable "alb_ingress_cidrs" {
   description = "CIDRs allowed to reach the ALB."
   type        = list(string)
+}
+
+variable "app_direct_cidrs" {
+  description = "CIDRs allowed to reach the app port directly, bypassing the ALB. Empty = ALB only."
+  type        = list(string)
+  default     = []
+}
+
+variable "ssh_cidr" {
+  description = "CIDR allowed SSH access (x.x.x.x/32). Empty = no SSH rule; use SSM Session Manager."
+  type        = string
+  default     = ""
 }
 
 variable "egress_cidrs" {

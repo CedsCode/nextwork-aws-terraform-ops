@@ -3,4 +3,8 @@
 *.tfstate.*
 *.tfvars
 !*.tfvars.example
+*.tfplan
+tfplan
+backend.hcl
 crash.log
+HANDOFF.md
