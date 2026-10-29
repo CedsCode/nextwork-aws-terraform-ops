@@ -4,12 +4,53 @@ Terraform for a NextWork 6-Day DevOps Challenge project on AWS (`ap-southeast-1`
 a CodePipeline CI/CD flow that builds a Maven webapp and deploys it to a Tomcat EC2 instance,
 fronted by an ALB with alarms and a cost budget. This replaces the original CloudFormation stack.
 
+Part of my portfolio: **[cedscode.vercel.app](https://cedscode.vercel.app/)**
+
 > ## Disclaimer
 > Personal learning and portfolio project, built while completing NextWork's 6-Day DevOps
 > Challenge. **Not production-ready:** single instance, no autoscaling, HTTP only (no TLS).
 > **It costs real money** (the ALB is roughly US$16-20/month); run `terraform destroy` when idle.
 > It targets the default VPC of one region. Provided as-is, with no warranty - review
 > `terraform plan` before applying to your own account. Not affiliated with NextWork or AWS.
+
+## Architecture
+```mermaid
+flowchart LR
+    dev["Developer"] -->|git push| gh["GitHub repo<br/>nextwork-web-project"]
+    user["Browser"] -->|HTTP :80| alb
+
+    subgraph aws["AWS ap-southeast-1 (Terraform)"]
+        conn["CodeStar connection"]
+
+        subgraph cicd["CI/CD: CodePipeline V2"]
+            src["Source"] --> build["Build<br/>CodeBuild"] --> deploy["Deploy<br/>CodeDeploy"]
+        end
+
+        ca["CodeArtifact<br/>Maven Central upstream"]
+        s3["S3 artifact bucket"]
+
+        subgraph vpc["Default VPC"]
+            alb["ALB + target group"] -->|:8080 from ALB SG only| ec2["EC2 web server<br/>Tomcat 9, SSM access"]
+        end
+
+        subgraph ops["Monitoring and cost"]
+            cw["CloudWatch alarms<br/>status check, unhealthy hosts, 5XX"] --> sns["SNS topic"]
+            budget["Monthly budget<br/>tag: Project"]
+        end
+
+        state[("S3 remote state<br/>bootstrap/")]
+    end
+
+    gh --> conn --> src
+    build -->|dependencies| ca
+    build -->|artifacts| s3
+    s3 --> deploy
+    deploy -->|deploys WAR| ec2
+    ec2 -.->|metrics| cw
+    alb -.->|metrics| cw
+    sns -->|email| dev
+    budget -->|email| dev
+```
 
 ## Secret missions completed
 Both NextWork secret missions were completed in the original CloudFormation-based build of this project:
