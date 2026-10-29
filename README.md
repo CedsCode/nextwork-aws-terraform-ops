@@ -14,43 +14,7 @@ Part of my portfolio: **[cedscode.vercel.app](https://cedscode.vercel.app/)**
 > `terraform plan` before applying to your own account. Not affiliated with NextWork or AWS.
 
 ## Architecture
-```mermaid
-flowchart LR
-    dev["Developer"] -->|git push| gh["GitHub repo<br/>nextwork-web-project"]
-    user["Browser"] -->|HTTP :80| alb
-
-    subgraph aws["AWS ap-southeast-1 (Terraform)"]
-        conn["CodeStar connection"]
-
-        subgraph cicd["CI/CD: CodePipeline V2"]
-            src["Source"] --> build["Build<br/>CodeBuild"] --> deploy["Deploy<br/>CodeDeploy"]
-        end
-
-        ca["CodeArtifact<br/>Maven Central upstream"]
-        s3["S3 artifact bucket"]
-
-        subgraph vpc["Default VPC"]
-            alb["ALB + target group"] -->|:8080 from ALB SG only| ec2["EC2 web server<br/>Tomcat 9, SSM access"]
-        end
-
-        subgraph ops["Monitoring and cost"]
-            cw["CloudWatch alarms<br/>status check, unhealthy hosts, 5XX"] --> sns["SNS topic"]
-            budget["Monthly budget<br/>tag: Project"]
-        end
-
-        state[("S3 remote state<br/>bootstrap/")]
-    end
-
-    gh --> conn --> src
-    build -->|dependencies| ca
-    build -->|artifacts| s3
-    s3 --> deploy
-    deploy -->|deploys WAR| ec2
-    ec2 -.->|metrics| cw
-    alb -.->|metrics| cw
-    sns -->|email| dev
-    budget -->|email| dev
-```
+![Architecture diagram: GitHub to CodePipeline (CodeBuild, CodeDeploy) deploying to an EC2 web server behind an ALB in the default VPC, with CodeArtifact, S3 remote state, CloudWatch, SNS and a budget](docs/architecture.svg)
 
 ## Secret missions completed
 Both NextWork secret missions were completed in the original CloudFormation-based build of this project:
